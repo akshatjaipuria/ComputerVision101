@@ -53,7 +53,7 @@ class Network(nn.Module):
         x1 = self.Conv1_2(x1)  # ------------------------ 1  x 1  x 32 -> 1  x 1  x 10
 
         x1 = x1.view(-1, 10)
-        output1 = F.log_softmax(x1, dim=1)
+        output1 = x1
 
         x2 = torch.cat((x1, pInput2), dim=1)
 
@@ -63,6 +63,6 @@ class Network(nn.Module):
         x2 = self.Fc_2(x2)
         x2 = F.relu(x2)
 
-        output2 = F.log_softmax(x2, dim=1)
+        output2 = x2
 
         return output1, output2
