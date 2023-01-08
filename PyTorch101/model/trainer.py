@@ -3,6 +3,8 @@ import torch
 
 def Train(pModel, pTrainLoader, pDevice, pOptimizer, pCriterion, pCurrentEpoch):
     pModel.train()
+    mnist_dig_total_loss = 0
+    dig_sum_total_loss = 0
 
     for batch_idx, data in enumerate(pTrainLoader):
         data["input_mnist_image"] = data["input_mnist_image"].to(pDevice)
@@ -16,22 +18,22 @@ def Train(pModel, pTrainLoader, pDevice, pOptimizer, pCriterion, pCurrentEpoch):
         )
 
         mnist_dig_loss = pCriterion(mnist_dig_output, data["mnist_gt"])
+        mnist_dig_total_loss += mnist_dig_loss.item()
         mnist_dig_loss.backward(retain_graph=True)  # calculating gradients
 
         dig_sum_loss = pCriterion(dig_sum_output, data["sum_gt"])
+        dig_sum_total_loss += dig_sum_loss.item()
         dig_sum_loss.backward()  # calculating gradients
 
         pOptimizer.step()  # updating weights
 
-        if batch_idx == (len(pTrainLoader) - 1):
-            print(
-                "Train Epoch: {}  Loss (MNIST Digit): {:.6f}\tLoss (Digit Sum): {:.6f}".format(
-                    pCurrentEpoch,
-                    mnist_dig_loss.item(),
-                    dig_sum_loss.item()
-                )
-            )
-            print(f"Batch ID: {batch_idx}")
+    print(
+        "Training Epoch: {}  Loss (MNIST Digit): {:.6f}\tLoss (Digit Sum): {:.6f}".format(
+            pCurrentEpoch,
+            mnist_dig_total_loss / len(pTrainLoader),
+            dig_sum_total_loss / len(pTrainLoader)
+        )
+    )
 
 
 def Validate(pModel, pValidLoader, pDevice, pCriterion):
