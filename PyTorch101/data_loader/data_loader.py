@@ -15,21 +15,21 @@ class CustomMNISTDataset(Dataset):
 
         self.DataLen = len(self.InputData1)
 
-        self.InputData2 = torch.floor(10 * torch.rand(self.DataLen))
+        self.InputData2 = torch.randint(low=0, high=10, size=(self.DataLen,))
 
-    def __getitem__(self, index):
+    def __getitem__(self, pIndex):
         return {
-            "input_mnist_image": self.InputData1[index][0],
-            "input_number": self.InputData2[index],
-            "mnist_gt": self.InputData1[index][1],
-            "sum_gt": self.InputData2[index] + self.InputData1[index][1],
+            "input_mnist_image": self.InputData1[pIndex][0],
+            "input_number": self.InputData2[pIndex],
+            "mnist_gt": self.InputData1[pIndex][1],
+            "sum_gt": self.InputData2[pIndex] + self.InputData1[pIndex][1],
         }
 
     def __len__(self):
         return self.DataLen
 
 
-def GetData(pDataFolderPath="./data/", batch_size=32):
+def GetData(pDataFolderPath="./data/", pBatchSize=32):
     train_dataset = CustomMNISTDataset(
         pDataFolderPath=pDataFolderPath, pIsTrainData=True
     )
@@ -46,7 +46,7 @@ def GetData(pDataFolderPath="./data/", batch_size=32):
     if cuda:
         torch.cuda.manual_seed(SEED)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=pBatchSize, shuffle=True)
+    valid_loader = DataLoader(valid_dataset, batch_size=pBatchSize, shuffle=True)
 
     return train_loader, valid_loader
