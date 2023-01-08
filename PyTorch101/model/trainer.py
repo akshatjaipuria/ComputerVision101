@@ -41,7 +41,7 @@ def Train(pModel, pTrainLoader, pDevice, pOptimizer, pCriterion):
         pOptimizer.step()  # updating weights
 
     print(
-        "Training Epoch: (MNIST Digit: Loss = {:.6f}, Acc = {:.2f}%)\t(Digit Sum: Loss = {:.6f}, Acc = {:.2f}%)".format(
+        "Training: (MNIST Digit: Loss = {:.6f}, Acc = {:.2f}%)\t(Digit Sum: Loss = {:.6f}, Acc = {:.2f}%)".format(
             mnist_dig_total_loss / len(pTrainLoader),
             100. * (mnist_dig_correct_pred / len(pTrainLoader.dataset)),
             dig_sum_total_loss / len(pTrainLoader),
@@ -92,10 +92,8 @@ def TrainModel(pModel, pTrainLoader, pValidLoader, pCriterion, pEpochs=10, pLear
     optim = torch.optim.Adam(pModel.parameters(), lr=pLearningRate)
 
     for epoch in range(1, pEpochs + 1):
-        print(f"Epoch {epoch} --------------------------")
+        print(f"-------------- Epoch {epoch} --------------")
         if pTrainLoader:
             Train(pModel, pTrainLoader, pDevice, optim, pCriterion)
         if pValidLoader:
-            print("Validating.....")
             Validate(pModel, pValidLoader, pDevice, pCriterion)
-        print("----------------------------------------")
