@@ -61,8 +61,6 @@ class Network(nn.Module):
         x2 = F.relu(x2)
 
         x2 = self.Fc_2(x2)
-        x2 = F.relu(x2)
-
         output2 = x2
 
         return output1, output2

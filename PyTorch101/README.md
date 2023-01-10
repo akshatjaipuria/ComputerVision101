@@ -51,11 +51,11 @@ The accuracy is measured through calculating the total number of correct predict
 
 ```
 By the end of the 10th Epoch:
-	Training accuracy for MNIST digit	: 98.39%
-	Training accuracy for the sum	 	: 76.45%
+	Training accuracy for MNIST digit	: 98.43%
+	Training accuracy for the sum	 	: 97.49%
 	
-	Validation accuracy for MNIST digit	: 98.37%
-	Validation accuracy for the sum	 	: 76.33%
+	Validation accuracy for MNIST digit	: 98.52%
+	Validation accuracy for the sum	 	: 97.71%
 ```
 
 The loss function used is Cross Entropy which had a very fast loss convergence. This is a very simple loss function which evaluates the class predictions for each class in the vector individually and then takes the average.
