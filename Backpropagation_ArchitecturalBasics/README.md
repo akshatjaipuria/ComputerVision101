@@ -42,3 +42,56 @@ By altering the learning rate, the following graphs were obtained:
 
 
 # Architectural basics
+
+We have some basic components and concepts that are necessary to understand in order to build a good model and provide it with a good training. These are:
+
+1. Number of layers
+2. MaxPooling
+3. 1x1 Convolutions
+4. 3x3 Convolutions
+5. Receptive Field
+6. SoftMax
+7. Learning Rate
+8. Kernels and how do we decide the number of kernels?
+9. Batch Normalization
+10. Image Normalization
+11. Position of MaxPooling
+12. Concept of Transition Layers
+13. Position of Transition Layers
+14. Dropout
+15. When do we introduce Dropout, or when do we know we have some overfitting
+16. The distance of MaxPooling from the Prediction layer
+17. The distance of Batch Normalization from Prediction layer
+18. How do we know our network is not going well, comparatively, very early
+19. Batch Size, and effects of batch size, etc.
+
+
+
+The idea here is to apply all these concepts and build a model to train over MNIST dataset and achieve *more than 99.4%* Validation accuracy with less than *20K Parameters* and *within 20 epochs*.
+
+
+
+While performing these exercise, a few **observations** were made (we are referring to validation accuracy everywhere below):
+
+1. The convergence of the accuracy was very fast till 98-99%
+2. Even the a lighter model (with less than 3-4K parameters) could easily be trained to achieve 98-99% accuracy.
+3. Given X number of parameters and a good crafting of model, a model which is deeper with approximately X no. of parameters performed much better than if we would just get the parameter count high by increasing the no. of channels.
+4. There were few images in the validation dataset that the model was actually struggling to predict correctly:
+
+<p align="center">
+  <img src="files/difficult_inputs.png">
+</p>
+
+
+After observing the incorrectly predicted images, certain augmentations like **Center crop** and **Random rotation** were used to mimic the rough data while training. The model architecture and the training can be referred from the `ArchitecturalBasics.ipynb` notebook.
+
+1. Model Parameter Count: 12,696
+2. Total training epochs: 20
+3. Highest Validation Accuracy: 99.5%
+
+Loss and accuracy curve:
+
+<p align="center">
+  <img src="files/loss_accuracy_curve.jpg", width="700">
+</p>
+
