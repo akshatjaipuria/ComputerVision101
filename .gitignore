@@ -3,3 +3,4 @@ test.ipynb
 data
 .vscode
 __pycache__
+*.drawio

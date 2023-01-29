@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchsummary import summary
+import torchsummary
 from enum import Enum
 
 
@@ -109,24 +109,24 @@ class Network(nn.Module):
             self.norm8 = nn.BatchNorm2d(16)
 
         elif pNormalization == Normalization.LayerNormalization:
-            self.norm1 = nn.BatchNorm2d(4)
-            self.norm2 = nn.BatchNorm2d(8)
-            self.norm3 = nn.BatchNorm2d(16)
-            self.norm4 = nn.BatchNorm2d(16)
-            self.norm5 = nn.BatchNorm2d(4)
-            self.norm6 = nn.BatchNorm2d(8)
-            self.norm7 = nn.BatchNorm2d(16)
-            self.norm8 = nn.BatchNorm2d(16)
+            self.norm1 = nn.GroupNorm(1, 4) # nn.LayerNorm([4, 26, 26])
+            self.norm2 = nn.GroupNorm(1, 8) # nn.LayerNorm([8, 24, 24])
+            self.norm3 = nn.GroupNorm(1, 16) # nn.LayerNorm([16, 22, 22])
+            self.norm4 = nn.GroupNorm(1, 16) # nn.LayerNorm([16, 20, 20])
+            self.norm5 = nn.GroupNorm(1, 4) # nn.LayerNorm([4, 10, 10])
+            self.norm6 = nn.GroupNorm(1, 8) # nn.LayerNorm([8, 8, 8])
+            self.norm7 = nn.GroupNorm(1, 16) # nn.LayerNorm([16, 6, 6])
+            self.norm8 = nn.GroupNorm(1, 16) # nn.LayerNorm([16, 4, 4])
 
         elif pNormalization == Normalization.GroupNormalization:
-            self.norm1 = nn.BatchNorm2d(4)
-            self.norm2 = nn.BatchNorm2d(8)
-            self.norm3 = nn.BatchNorm2d(16)
-            self.norm4 = nn.BatchNorm2d(16)
-            self.norm5 = nn.BatchNorm2d(4)
-            self.norm6 = nn.BatchNorm2d(8)
-            self.norm7 = nn.BatchNorm2d(16)
-            self.norm8 = nn.BatchNorm2d(16)
+            self.norm1 = nn.GroupNorm(2, 4)
+            self.norm2 = nn.GroupNorm(2, 8)
+            self.norm3 = nn.GroupNorm(2, 16)
+            self.norm4 = nn.GroupNorm(2, 16)
+            self.norm5 = nn.GroupNorm(2, 4)
+            self.norm6 = nn.GroupNorm(2, 8)
+            self.norm7 = nn.GroupNorm(2, 16)
+            self.norm8 = nn.GroupNorm(2, 16)
 
     def forward(self, x):
         x = self.convblock1(x)
@@ -169,8 +169,5 @@ class Network(nn.Module):
         return F.log_softmax(x, dim=-1)
 
 
-def PrintSummary(pModel):
-    use_cuda = torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
-    pModel = pModel.to(device)
-    print(summary(pModel, input_size=(1, 28, 28)))
+def PrintSummary(pModel, PInpSize=(1, 28, 28)):
+    print(torchsummary.summary(pModel, input_size=PInpSize))

@@ -4,10 +4,10 @@ from torch.utils.data import DataLoader
 
 def GetDataLoaders(pDatasetClass, pTrainTransforms, pTestTransforms, pBatchSize=128):
     train_dataset = pDatasetClass(
-        "../data", train=True, download=True, transform=pTrainTransforms
+        "./data", train=True, download=True, transform=pTrainTransforms
     )
     test_dataset = pDatasetClass(
-        "../data", train=False, download=True, transform=pTestTransforms
+        "./data", train=False, download=True, transform=pTestTransforms
     )
 
     SEED = 1
