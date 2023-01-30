@@ -1,6 +1,9 @@
 import torch
 from tqdm import tqdm
 
+def EmptyFunc(*pArgs, **pKwargs):
+    return 0
+
 def GetCorrectPredCount(pPrediction, pLabels):
     return pPrediction.argmax(dim=1).eq(pLabels).sum().item()
 
@@ -14,7 +17,10 @@ def FillWrongPredictions (pData, pTarget, pPred, pOutDict):
     pOutDict['ground_truths'] += [target[x] for x in range(len(correct_pred_indices)) if not correct_pred_indices[x]]
     pOutDict['predicted_vals'] += [pred[x] for x in range(len(correct_pred_indices)) if not correct_pred_indices[x]]
 
-def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pTrainAccList, pTrainLossList):
+def L1RegularizationTermFunc(pModel, pLambda):
+    return pLambda * sum(p.abs().sum() for p in pModel.parameters())
+
+def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pRegularizationTermFunc, pTrainAccList, pTrainLossList):
     pModel.train()
     pbar = tqdm(pTrainLoader)
     
@@ -31,6 +37,7 @@ def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pTrainAccList,
         
         # Calculate loss
         loss = pCriterion(pred, target)
+        loss = loss + pRegularizationTermFunc(pModel, 0.001).to(pDevice)
         train_loss+=loss.item()
         
         # Backpropagation
@@ -45,7 +52,7 @@ def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pTrainAccList,
     pTrainAccList.append(100*correct/processed)
     pTrainLossList.append(train_loss/len(pTrainLoader))
 
-def Test(pModel, pTestLoader, pDevice, pCriterion, pTestAccList, pTestLossList, pFillIncorrectSamples, pTestIncorrectPredList):
+def Test(pModel, pTestLoader, pDevice, pCriterion, pTestAccList, pTestLossList, pFillIncorrectSamplesFunc, pTestIncorrectPredList):
     pModel.eval()
 
     test_loss = 0
@@ -60,8 +67,7 @@ def Test(pModel, pTestLoader, pDevice, pCriterion, pTestAccList, pTestLossList, 
 
             correct += GetCorrectPredCount(output, target)
 
-            if pFillIncorrectSamples:
-              FillWrongPredictions (data, target, output, pTestIncorrectPredList)
+            pFillIncorrectSamplesFunc (data, target, output, pTestIncorrectPredList)
 
     test_loss /= len(pTestLoader.dataset)
     pTestAccList.append(100. * correct / len(pTestLoader.dataset))
@@ -72,7 +78,7 @@ def Test(pModel, pTestLoader, pDevice, pCriterion, pTestAccList, pTestLossList, 
         100. * correct / len(pTestLoader.dataset)))
 
 
-def TrainModel(pModel, pTrainLoader, pTestLoader, pCriterion, pEpochs=10, pLearningRate=0.001, pDevice="cpu"):
+def TrainModel(pModel, pTrainLoader, pTestLoader, pCriterion, pApplyL1Regularization=False, pEpochs=10, pLearningRate=0.001, pDevice="cpu"):
     pModel.to(pDevice)
     optim = torch.optim.SGD(pModel.parameters(), lr=pLearningRate, momentum=0.9)
 
@@ -82,11 +88,14 @@ def TrainModel(pModel, pTrainLoader, pTestLoader, pCriterion, pEpochs=10, pLearn
     test_losses = []
     test_incorrect_pred = {'images': [], 'ground_truths': [], 'predicted_vals': []}
 
+    reg_term_func = L1RegularizationTermFunc if pApplyL1Regularization else EmptyFunc
+
     for epoch in range(1, pEpochs + 1):
         print(f"-------------- Epoch {epoch} --------------")
         if pTrainLoader:
-            Train(pModel, pTrainLoader, pDevice, optim, pCriterion(), train_acc, train_losses)
+            Train(pModel, pTrainLoader, pDevice, optim, pCriterion(), reg_term_func, train_acc, train_losses)
         if pTestLoader:
-            Test(pModel, pTestLoader, pDevice, pCriterion(reduction='sum'), test_acc, test_losses, epoch == pEpochs, test_incorrect_pred)
+            incorrect_pred_func = FillWrongPredictions if epoch==pEpochs else EmptyFunc
+            Test(pModel, pTestLoader, pDevice, pCriterion(reduction='sum'), test_acc, test_losses,  incorrect_pred_func, test_incorrect_pred)
 
     return {"train_acc": train_acc, "train_loss": train_losses, "test_acc": test_acc, "test_loss": test_losses, "incorrect_pred": test_incorrect_pred}
