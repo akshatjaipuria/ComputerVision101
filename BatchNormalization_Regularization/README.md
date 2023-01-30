@@ -7,7 +7,7 @@ Note: While training the model with Batch Norm. we will also be adding the L1 re
 ## Group vs Layer vs Batch Normalizations
 
 <p align="center">
-  <img src="files/normalization.jpg" width="700">
+  <img src="files/Normalization.jpg" width="700">
 </p>
 
 ## Loss
