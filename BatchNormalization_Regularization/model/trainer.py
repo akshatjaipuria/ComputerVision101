@@ -37,7 +37,7 @@ def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pRegularizatio
         
         # Calculate loss
         loss = pCriterion(pred, target)
-        loss = loss + pRegularizationTermFunc(pModel, 0.001).to(pDevice)
+        loss = loss + pRegularizationTermFunc(pModel, 0.001)
         train_loss+=loss.item()
         
         # Backpropagation
