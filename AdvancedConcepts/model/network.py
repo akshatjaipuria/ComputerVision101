@@ -38,13 +38,13 @@ class Network(nn.Module):
         self.convblock3 = nn.Sequential(
             nn.Conv2d(
                 in_channels=32,
-                out_channels=32,
+                out_channels=64,
                 kernel_size=(3, 3),
                 padding=1,
                 bias=False,
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(32),
+            nn.BatchNorm2d(64),
             nn.Dropout(pDropout),
         )  # output_size = 32  RF = 7
 
@@ -54,27 +54,27 @@ class Network(nn.Module):
         # CONVOLUTION BLOCK 2
         self.convblock4 = nn.Sequential(
             nn.Conv2d(
-                in_channels=32,
-                out_channels=32,
+                in_channels=64,
+                out_channels=64,
                 kernel_size=(3, 3),
                 padding=1,
                 bias=False,
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(32),
+            nn.BatchNorm2d(64),
             nn.Dropout(pDropout),
         )  # output_size = 16  RF = 12
         self.convblock5 = nn.Sequential(
             nn.Conv2d(
-                in_channels=32,
-                out_channels=32,
+                in_channels=64,
+                out_channels=64,
                 kernel_size=(3, 3),
                 padding=2,
                 bias=False,
                 dilation=2,
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(32),
+            nn.BatchNorm2d(64),
             nn.Dropout(pDropout),
         )  # output_size = 16  RF = 20
 
@@ -84,7 +84,7 @@ class Network(nn.Module):
         # CONVOLUTION BLOCK 3
         self.convblock6 = nn.Sequential(
             nn.Conv2d(
-                in_channels=32,
+                in_channels=64,
                 out_channels=16,
                 kernel_size=(1, 1),
                 padding=0,
