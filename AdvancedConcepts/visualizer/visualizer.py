@@ -6,8 +6,8 @@ import math
 def Unnorm(pTensor, pMean, pStd):
 
     for t, m, s in zip(pTensor, pMean, pStd):
-        np.multiply (t, s, out = t)
-        np.add (t, m, out = t)
+        np.multiply(t, s, out=t)
+        np.add(t, m, out=t)
         # The normalize code -> t.sub_(m).div_(s)
     return pTensor
 
@@ -33,11 +33,11 @@ def DisplayData(pDataLoader, pClassLabelsMap=None, pMeanStd=None):
 
 
 def DisplayIncorrectPredictions(pIncPredDict, pClassLabelsMap=None, pMeanStd=None):
-    fig = plt.figure(figsize=(2, 5))
+    fig = plt.figure(figsize=(8, 3))
 
     num_imgs = min(10, len(pIncPredDict["images"]))
     for i in range(num_imgs):
-        plt.subplot(5, math.ceil(num_imgs / 5), i + 1)
+        plt.subplot(math.ceil(num_imgs / 5), 5, i + 1)
         img = np.array(pIncPredDict["images"][i])
         if pMeanStd:
             img = Unnorm(img, pMeanStd[0], pMeanStd[1])
@@ -45,19 +45,19 @@ def DisplayIncorrectPredictions(pIncPredDict, pClassLabelsMap=None, pMeanStd=Non
         if pClassLabelsMap:
             plt.title(
                 f"GT: {pClassLabelsMap[pIncPredDict['ground_truths'][i]]}\nP: {pClassLabelsMap[pIncPredDict['predicted_vals'][i]]}",
-                fontsize=8,
+                fontsize=10,
             )
         else:
             plt.title(
                 f"GT: {pIncPredDict['ground_truths'][i]}, P: {pIncPredDict['predicted_vals'][i]}",
-                fontsize=8,
+                fontsize=10,
             )
         plt.xticks([])
         plt.yticks([])
     plt.tight_layout()
 
 
-def PlotTestVsTrain(pTrainInfoLabelAndList: tuple, pTestInfoLabelAndList: tuple):
+def PlotTrainVsTest(pTrainInfoLabelAndList: tuple, pTestInfoLabelAndList: tuple):
     fig, axs = plt.subplots(1, 2, figsize=(10, 4))
 
     axs[0].plot(pTrainInfoLabelAndList[1])
