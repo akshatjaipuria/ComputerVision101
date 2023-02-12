@@ -3,14 +3,6 @@ import numpy as np
 import torchsummary
 
 
-def UnnormNumpy(pTensor, pMean, pStd):
-
-    for t, m, s in zip(pTensor, pMean, pStd):
-        np.multiply(t, s, out=t)
-        np.add(t, m, out=t)
-        # The normalize code -> t.sub_(m).div_(s)
-    return pTensor
-
 def Denormalize(image, mean, std, out_type='np_array'):
     """Un-normalize a given image,i.e., tensor or numpy array
     Args:

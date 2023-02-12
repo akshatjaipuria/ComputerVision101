@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-from .utils import UnnormNumpy
+from .utils import Denormalize
 
 
 def DisplayData(pDataLoader, pClassLabelsMap=None, pMeanStd=None):
@@ -14,8 +14,11 @@ def DisplayData(pDataLoader, pClassLabelsMap=None, pMeanStd=None):
         plt.tight_layout()
         img = batch_data[i].numpy()
         if pMeanStd:
-            img = UnnormNumpy(img, pMeanStd[0], pMeanStd[1])
-        plt.imshow(np.transpose(img, (1, 2, 0)))
+            img = Denormalize(batch_data[i], pMeanStd[0], pMeanStd[1])
+        else:
+            img = batch_data[i].numpy()
+            img = np.transpose(img, (1, 2, 0))
+        plt.imshow(img)  # type: ignore 
         if pClassLabelsMap:
             plt.title(pClassLabelsMap[batch_label[i]])
         else:
@@ -30,10 +33,12 @@ def DisplayIncorrectPredictions(pIncPredDict, pClassLabelsMap=None, pMeanStd=Non
     num_imgs = min(10, len(pIncPredDict["images"]))
     for i in range(num_imgs):
         plt.subplot(math.ceil(num_imgs / 5), 5, i + 1)
-        img = np.array(pIncPredDict["images"][i])
         if pMeanStd:
-            img = UnnormNumpy(img, pMeanStd[0], pMeanStd[1])
-        plt.imshow(np.transpose(img, (1, 2, 0)))
+            img = Denormalize(pIncPredDict["images"][i], pMeanStd[0], pMeanStd[1])
+        else:
+            img = pIncPredDict["images"][i].numpy()
+            img = np.transpose(img, (1, 2, 0))
+        plt.imshow(img)  # type: ignore 
         if pClassLabelsMap:
             plt.title(
                 f"GT: {pClassLabelsMap[pIncPredDict['ground_truths'][i]]}\nP: {pClassLabelsMap[pIncPredDict['predicted_vals'][i]]}",

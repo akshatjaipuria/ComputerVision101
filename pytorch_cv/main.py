@@ -6,7 +6,7 @@ class TrainTransforms:
     def __init__(self, pMean, pStd):
         self.train_transform = alb.Compose([
             alb.Resize(36, 36, 3),
-            alb.RandomCrop(32, 32),
+            alb.RandomResizedCrop(32, 32),
             #alb.HorizontalFlip(),
             #alb.ShiftScaleRotate(),
             alb.CoarseDropout(max_holes=1, max_height=16, max_width=16, min_holes=1, min_height=16, min_width=16, fill_value=[i * 2555 for i in pMean], mask_fill_value=None), # type: ignore
