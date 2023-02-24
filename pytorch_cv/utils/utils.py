@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import torchsummary
+from torch_lr_finder import LRFinder
 
 
 def Denormalize(image, mean, std, out_type='np_array'):
@@ -39,3 +40,20 @@ def ToTensor(np_array):
 
 def PrintSummary(pModel, PInpSize):
     print(torchsummary.summary(pModel, input_size=PInpSize))
+
+def FindLR(pModel, pOptimizer, pCriterion, pTrainLoader, pDevice="cpu"):
+    """Find learning rate for using One Cyclic LRFinder
+    Args:
+        pModel (instace): torch instace of defined model
+        pOptimizer (instance): optimizer to be used
+        pCriterion (instance): criterion to be used for calculating loss
+        pTrainLoader (instance): torch dataloader instace for trainig set
+        pDevice (instance): device to be used, cpu or gpu
+    """
+    lr_finder = LRFinder(pModel, pOptimizer, pCriterion, device=pDevice)
+    lr_finder.range_test(pTrainLoader, end_lr=10, num_iter=200, step_mode="exp")
+    lr_finder.plot()
+    min_loss = min(lr_finder.history['loss'])
+    ler_rate = lr_finder.history['lr'][np.argmin(lr_finder.history['loss'], axis=0)]
+    print(f"Min loss ({min_loss}) is at LR: {ler_rate}")
+    return ler_rate

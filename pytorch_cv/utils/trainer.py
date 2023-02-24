@@ -20,7 +20,7 @@ def FillWrongPredictions (pData, pTarget, pPred, pOutDict):
 def L1RegularizationTermFunc(pModel, pLambda):
     return pLambda * sum(p.abs().sum() for p in pModel.parameters())
 
-def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pRegularizationTermFunc, pTrainAccList, pTrainLossList):
+def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pRegularizationTermFunc, pTrainAccList, pTrainLossList, pScheduler=None, pLRHistory=None):
     pModel.train()
     pbar = tqdm(pTrainLoader)
     
@@ -47,7 +47,15 @@ def Train(pModel, pTrainLoader, pDevice, pOoptimizer, pCriterion, pRegularizatio
         correct += GetCorrectPredCount(pred, target)
         processed += len(data)
         
-        pbar.set_description(desc= f'Train: Loss={loss.item():0.4f} Batch_id={batch_idx} Accuracy={100*correct/processed:0.2f}')
+        if pScheduler:
+            pbar.set_description(desc= f'Train: LR={pScheduler.get_last_lr()[0]:0.6f} Loss={loss.item():0.4f} Batch_id={batch_idx} Accuracy={100*correct/processed:0.2f}')
+        else:
+            pbar.set_description(desc= f'Train: Loss={loss.item():0.4f} Batch_id={batch_idx} Accuracy={100*correct/processed:0.2f}')
+
+        if pScheduler:
+            if pLRHistory is not None:
+                pLRHistory.append(pScheduler.get_last_lr()[0])
+            pScheduler.step()
     
     pTrainAccList.append(100*correct/processed)
     pTrainLossList.append(train_loss/len(pTrainLoader))
@@ -73,29 +81,28 @@ def Test(pModel, pTestLoader, pDevice, pCriterion, pTestAccList, pTestLossList, 
     pTestAccList.append(100. * correct / len(pTestLoader.dataset))
     pTestLossList.append(test_loss)
 
-    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+    print('Test: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
         test_loss, correct, len(pTestLoader.dataset),
         100. * correct / len(pTestLoader.dataset)))
 
 
-def TrainModel(pModel, pTrainLoader, pTestLoader, pCriterion, pApplyL1Regularization=False, pEpochs=10, pLearningRate=0.001, pDevice="cpu"):
-    pModel.to(pDevice)
-    optim = torch.optim.SGD(pModel.parameters(), lr=pLearningRate, momentum=0.9)
+def TrainModel(pModel, pTrainLoader, pTestLoader, pCriterion, pOptimizer, pL1=False, pEpochs=10, pDevice="cpu", pScheduler=None):
 
     train_acc = []
     train_losses = []
     test_acc = []
     test_losses = []
+    lr_history = [] if pScheduler else None
     test_incorrect_pred = {'images': [], 'ground_truths': [], 'predicted_vals': []}
 
-    reg_term_func = L1RegularizationTermFunc if pApplyL1Regularization else EmptyFunc
+    reg_term_func = L1RegularizationTermFunc if pL1 else EmptyFunc
 
     for epoch in range(1, pEpochs + 1):
         print(f"-------------- Epoch {epoch} --------------")
         if pTrainLoader:
-            Train(pModel, pTrainLoader, pDevice, optim, pCriterion(), reg_term_func, train_acc, train_losses)
+            Train(pModel, pTrainLoader, pDevice, pOptimizer, pCriterion(), reg_term_func, train_acc, train_losses, pScheduler, lr_history)
         if pTestLoader:
             incorrect_pred_func = FillWrongPredictions if epoch==pEpochs else EmptyFunc
             Test(pModel, pTestLoader, pDevice, pCriterion(reduction='sum'), test_acc, test_losses,  incorrect_pred_func, test_incorrect_pred)
 
-    return {"train_acc": train_acc, "train_loss": train_losses, "test_acc": test_acc, "test_loss": test_losses, "incorrect_pred": test_incorrect_pred}
+    return {"train_acc": train_acc, "train_loss": train_losses, "test_acc": test_acc, "test_loss": test_losses, "incorrect_pred": test_incorrect_pred, "lr_history": lr_history}
